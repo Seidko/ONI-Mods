@@ -7,40 +7,23 @@ using PeterHan.PLib.Database;
 
 namespace CustomizeSweeperRange
 {
-    public class CustomizeSweeperRangeMod: UserMod2
+    public static class ModOption
     {
-        public override void OnLoad(Harmony harmony)
-        {
-            base.OnLoad(harmony);
-            PUtil.InitLibrary();
-            new POptions().RegisterOptions(this, typeof(RangeOptions));
-            new PLocalization().Register();
-        }
-    }
+        public static RangeOptions Options { get; set; }
 
-    [HarmonyPatch(typeof(Game), "Load")]
-    public static class GameOnLoadPatch
-    {
-        public static RangeOptions Settings { get; private set; }
-
-        public static void Prefix()
+        public static void ReadOptions()
         {
-            ReadSettings();
-        }
-        public static void ReadSettings()
-        {
-
-            Settings = POptions.ReadSettings<RangeOptions>();
-            if (Settings == null)
+            Options = POptions.ReadSettings<RangeOptions>();
+            if (Options == null)
             {
-                Settings = new RangeOptions();
+                Options = new RangeOptions();
             }
-
         }
     }
 
     [JsonObject(MemberSerialization.OptIn)]
     [ModInfo("https://github.com/Seidko/ONI-Mods", "preview.png")]
+    [RestartRequired]
     public class RangeOptions
     {
         [Option("CustomizeSweeperRange.STRINGS.OPTIONS.SweeperRange.NAME", "CustomizeSweeperRange.STRINGS.OPTIONS.SweeperRange.DESC")]
@@ -51,6 +34,18 @@ namespace CustomizeSweeperRange
         public RangeOptions()
         {
             SweeperRange = 4;
+        }
+    }
+
+    public class CustomizeSweeperRangeMod : UserMod2
+    {
+        public override void OnLoad(Harmony harmony)
+        {
+            base.OnLoad(harmony);
+            PUtil.InitLibrary();
+            new POptions().RegisterOptions(this, typeof(RangeOptions));
+            new PLocalization().Register();
+            ModOption.ReadOptions();
         }
     }
 }
